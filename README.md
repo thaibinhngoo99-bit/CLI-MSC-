@@ -2,7 +2,7 @@
 
 A command-line Mandarin Square Capture game built with **F# / .NET 10**.
 
-You play against a random enemy **X**. Enter a square number (1–5) and a dỉrection (Clockwise-Counter-clockwise) to make your move.
+You play against a random enemy **X**. Enter a square number (1–5) and a dỉrection (left, right) to make your move.
 
 ---
 
@@ -57,20 +57,38 @@ dotnet publish -c Release -r linux-x64 --self-contained
 |   | 1 | 2 | 3 | 4 | 5 |   |
 ```
 
-Empty squares display their number. Placed marks display `O` or `X`.
+Each squares display the number of stones currently in it. Empty squares display 0.
+
+### Game starts
+
+1. The board is printed, each
+2. You are prompted: 'Would you like to go first?'
+3. Type Y or N and press **Enter**
+   - If the input is not Y or N, you are asked to try again.
+   - If the input is Y, you start taking your turn.
+   - If the input is N, the enemy starts taking their turn.
+
+### Distribution rule:
+Given a tile number and a 
 
 ### Taking a Turn
 
-1. The current board is printed.
-2. You are prompted: `Your move (1-9):`
+1. If all tiles from 1-5 is empty, you are prompted: `You don't have any pebbles to use!`
+   - If your score > 0, the system automatically deducts 1 point from your score and put 1 pebble into each tile from 1-5 respectively until your score is 0 or all 5 tiles have 1 pebble each. Your turn then continues as normal.
+   - If your score = 0, you are prompted: `Sorry, you lost your turn!` and lost your turn. The enemy will start taking their turn
+2. If there exists at least 1 non-empty tile from 1-5, you are prompted: `Select your tile (1-5):`
 3. Type a number and press **Enter**.
-   - If the input is not a number in 1–9, you are asked to try again.
-   - If the selected square is already occupied, you are asked to try again.
-4. `O` is placed on your chosen square.
+   - If the input is not a number in 1–5, you are asked to try again.
+   - If the selected tile has no pebbles, you are asked to try again.
+   - The s
+4. You are then prompted: `Select the direction (L-R):`
+5. Type L or R and press **Enter**.
+   - If the input is not L or R, you are asked to try again.
+   - If the selected tile has no pebbles
 
 ### Enemy Turn
 
-After your move, the enemy automatically picks a random empty square and places `X`.
+After your move, the enemy automatically picks a random tile numbered from 6-10 that contains at least 1 pebble and places `X`.
 The chosen square number is printed so you can follow along.
 
 ### Winning & Ending
