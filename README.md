@@ -1,11 +1,22 @@
-# CLI MSC
+# CLI Mandarin Square Capture (Ô ăn quan)
 
-A command-line Mandarin Square Capture game built with **F# / .NET 10**.
+A command-line implementation of Mandarin Square Capture, built with **F# / .NET 10**.
 
-You play against a random enemy **X**. Enter a square number (1–5) and a dỉrection (left, right) to make your move.
+Play against a simple AI opponent in this classic Vietnamese strategy game of distribution and capture.
 
 ---
+## What is this game?
 
+Mandarin Square Capture (Ô ăn quan) is a Vietnamese traditional two-player board game.
+
+Each turn, you:
+- Pick a square on your side.
+- Distribute its stones across the board.
+- Capture stones based on where your moves end.
+
+Goal: Collect more stones than your opponent by the end of the game. 
+
+---
 ## Getting Started
 
 ### Prerequisites
@@ -47,57 +58,76 @@ dotnet publish -c Release -r linux-x64 --self-contained
 
 ## How to Play
 
-### Board Layout
+### Game Board
 
-10 unit squares of the 2*5 middle rectangle are numbered 1–10 counter-clockwise from bottom-left to top-left. 2 big rectangles on the sides are labeled A and B
+The board consists of:
+- 10 small tiles labeled 1 to 10 (5 per player)
+- 2 large tiles A, B at both ends (Mandarin tiles)
 
 ```
 |   | 10 | 9 | 8 | 7 | 6 |   |
-| A +---+---+---+---+---+ B |
+| B +---+---+---+---+---+ A |
 |   | 1 | 2 | 3 | 4 | 5 |   |
 ```
 
-Each squares display the number of stones currently in it. Empty squares display 0.
+- You control tiles 1 to 5 (bottom row)
+- The enemy controls tiles 6 to 10 (top row)
+- Each tile displays the number of stones it contains
 
 ### Game starts
 
-1. The board is printed, each
-2. You are prompted: 'Would you like to go first?'
-3. Type Y or N and press **Enter**
+1. The board is printed, each tiles contains 5 stones.
+2. Your score and enemy's initial scores are set to 0
+3. You are prompted: 'Would you like to go first?'
+4. Type Y or N and press **Enter**
    - If the input is not Y or N, you are asked to try again.
-   - If the input is Y, you start taking your turn.
-   - If the input is N, the enemy starts taking their turn.
-
-### Distribution rule:
-Given a tile number and a 
+   - If the input is Y, you start the game.
+   - If the input is N, the enemy starts the game.
 
 ### Taking a Turn
 
-1. If all tiles from 1-5 is empty, you are prompted: `You don't have any pebbles to use!`
-   - If your score > 0, the system automatically deducts 1 point from your score and put 1 pebble into each tile from 1-5 respectively until your score is 0 or all 5 tiles have 1 pebble each. Your turn then continues as normal.
-   - If your score = 0, you are prompted: `Sorry, you lost your turn!` and lost your turn. The enemy will start taking their turn
+1. If all tiles from 1-5 are empty, you follow the refill rule (see Refill Rule for more details)
 2. If there exists at least 1 non-empty tile from 1-5, you are prompted: `Select your tile (1-5):`
 3. Type a number and press **Enter**.
    - If the input is not a number in 1–5, you are asked to try again.
-   - If the selected tile has no pebbles, you are asked to try again.
-   - The s
+   - If the selected tile has no stones, you are asked to try again.
 4. You are then prompted: `Select the direction (L-R):`
 5. Type L or R and press **Enter**.
    - If the input is not L or R, you are asked to try again.
-   - If the selected tile has no pebbles
+6. Your move follows the move mechanics (see Move Mechanics for more details)
+
+### Move Mechanics
+
+After a player chooses a tile and direction: 
+1. All stones in the chosen tile are picked up and distributed one-by-one into adjacent tiles in the chosen direction. 
+2. Once the last stone is placed in a tile, consider its adjacent tile in the chosen direction:
+- Case 1: If it has stones:
+    - If it is a Mandarin tile, you finish your turn.
+    - If it is not a Mandarin tile, you pick up the stones in that tile and continue distributing them in the same direction.
+- Case 2: If it is empty, consider the adjacent tile to it in the same direction:
+    - If it is also empty, you finish your turn.
+    - If it has stones, you capture the stones in the tile and your score increases by the amount of stones it has. The captured tile updates the number of stones it has to 0. 
+    - Captures can chain multiple times (rules of capturing follow step 2 of the move mechanics by considering the adjacent tile to the captured tile). Once the chain breaks, you finish your turn.
+
+### Refill Rule
+
+If all tiles on your side is empty and the game hasn't ended, you are prompted: `You must refill your tiles!`
+- If your score > 0, 1 point of your score is spent per tile to refill (the order is from 1 to 5) until all 5 tiles are filled or your score reaches 0. You can then resume your turn.
+- If your score = 0, you are prompted: `Sorry, you lost your turn!` and lost your turn.
 
 ### Enemy Turn
 
-After your move, the enemy automatically picks a random tile numbered from 6-10 that contains at least 1 pebble and places `X`.
-The chosen square number is printed so you can follow along.
+After your move, the enemy follows the same refill rule, selects a random valid tile and direction and performs the same move logic as yours automatically. The tile and direction chosen is displayed for you to follow
 
 ### Winning & Ending
 
+The game ends when both Mandarin tiles are captured at least once
+
 | Result | Condition |
 |--------|-----------|
-| **You win** | Three `O`s in a row, column, or diagonal |
-| **Enemy wins** | Three `X`s in a row, column, or diagonal |
-| **Tie** | All 9 squares filled with no winner |
+| **You win** | You have a higher score |
+| **Enemy wins** | Enemy has a higher score |
+| **Tie** | Your score ties with the enemy's |
 
 After the game ends, you are asked whether to play again.
 
@@ -106,25 +136,32 @@ After the game ends, you are asked whether to play again.
 ## Example Session
 
 ```
-=== CLI Tic-Tac-Toe ===
-You are O. Enemy is X. You go first.
+=== CLI MSC ===
+You go first.
+|   | 5 | 5 | 5 | 5 | 5 |   |
+| 5 +---+---+---+---+---+ 5 |
+|   | 5 | 5 | 5 | 5 | 5 |   |
+Your score = 0, enemy score = 0.
 
- 1 | 2 | 3
----+---+---
- 4 | 5 | 6
----+---+---
- 7 | 8 | 9
+Your turn:
+Your selected tile (1-5): 1
+Selected direction (L-R): R
+Board updates:
+|   | 6 | 6 | 6 | 6 | 0 |   |
+| 6 +---+---+---+---+---+ 6 |
+|   | 0 | 0 | 6 | 6 | 6 |   |
+Your score = 6, enemy score = 0
 
-Your move (1-9): 5
-Enemy places X on square 3.
+Enemy's turn:
+Enemy's selected tile (1-5): 8
+Selected direction (L-R): L
+Board updates:
+|   | 6 | 6 | 0 | 7 | 1 |   |
+| 6 +---+---+---+---+---+ 7 |
+|   | 0 | 0 | 7 | 7 | 7 |   |
+Your score = 6, enemy score = 0
 
- 1 | 2 | X
----+---+---
- 4 | O | 6
----+---+---
- 7 | 8 | 9
-
-Your move (1-9): 1
+Your turn:
 ...
 ```
 
@@ -133,13 +170,13 @@ Your move (1-9): 1
 ## Project Structure
 
 ```
-project-example/
-├── TicTacToe.fsproj    # .NET 10 F# project file
+CLI-MSC-/
+├── MSC.fsproj    # .NET 10 F# project file
 ├── run.bat             # Windows run script
 ├── run.sh              # Unix run script
 ├── README.md
 ├── requirements.md
-└── TicTacToe/
+└── MSC/
     ├── Board.fs        # Cell type, board state, rendering, win detection
     ├── Game.fs         # Game loop, player input validation, enemy AI
     └── Program.fs      # Entry point, play-again loop
@@ -148,8 +185,7 @@ project-example/
 ### Key Types
 
 ```fsharp
-// A cell is either an empty square (showing its number) or a placed mark
-type Cell = Empty of int | O | X
+// A tile only displays the number of stones it has, not its value. Values for each tiles are displayed at the beginning of the game.
 
 // Possible outcomes of a completed game
 type GameResult = PlayerWins | EnemyWins | Draw
@@ -160,15 +196,21 @@ type GameResult = PlayerWins | EnemyWins | Draw
 | Module | Responsibility |
 |--------|---------------|
 | `Board` | Immutable board operations: `create`, `tryPlace`, `winner`, `isFull`, `render` |
-| `Game`  | Main game loop, input validation, random enemy move, end-state display |
-| `Program` | Entry point; prints welcome message, drives play-again loop |
+| `Game`  | Turn handling, input validation, random AI behaviour, end-state display |
+| `Program` | Entry point; prints welcome message, replay loop |
 
 ---
 
-## Rules Summary
+## Author Notes
 
-- You are always **O** and always go first.
-- The enemy is always **X** and always moves randomly.
-- Selecting an occupied or invalid square re-prompts — the turn does **not** advance.
-- Three marks of the same kind in any row, column, or diagonal wins the game.
-- A full board with no winner is a tie.
+- Invalid inputs do not consume your turn.
+- Enemy's direction input is considered the same as your input (enemy's left is also your left).
+- The game is deterministic except for enemy randomness.
+- Designed for clarity and learning purposes.
+
+## Future improvements
+
+- Smarter AI (strategy instead of random)
+- Better UI visualization
+- Configurable scoring rules
+- Multiplayer mode
