@@ -1,6 +1,6 @@
 Project Title: CLI -MSC-
 
-Overview: This project is a command-line Mandarin Square Capture game where the user plays against a random enemy. The user can choose to go first/ last.
+Overview: This project is a command-line Mandarin Square Capture (Ô ăn quan) game where the user plays against a random enemy. The user can choose to go first/ last.
 
 Requirements:
 
