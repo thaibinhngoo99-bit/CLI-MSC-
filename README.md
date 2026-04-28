@@ -76,7 +76,7 @@ The board consists of:
 
 ### Game starts
 
-1. The board is printed, each tiles contains 5 stones.
+1. The board is printed, each tiles contains 5 stones. A guide to select tiles is printed next.
 2. Your score and enemy's initial scores are set to 0
 3. You are prompted: 'Would you like to go first?'
 4. Type Y or N and press **Enter**
