@@ -1,14 +1,131 @@
-Project Title: CLI -MSC-
+**Project Title:** CLI Mandarin Square Capture (MSC)
 
-Overview: This project is a command-line Mandarin Square Capture game where the user plays against a random enemy. The user can choose to go first/ last.
+---
 
-Requirements:
+## Overview
 
-1. The user will choose to go first or last.
-2. The user will see a MSC board with 5 stones per tile, a scoreboard of 0 to 0 and a guide to select tiles is printed.
-2. The user will make a move by either following the refill rule or selecting a tile from 1 to 5 and a left/right direction. 
-3. If the user selects a non-empty tile and a valid direction, the user's turn will follow the move mechanics. Otherwise, the user will be asked to retry the input.
-4. After the user's turn is completed and the scores & board are updated, it becomes the enemy's turn. The enemy will always either choose a random non-empty tile and a random direction, or follow the refill rule. The same move mechanics is applied to the enemy.
-5. The user and the enemy will take turns making moves.
-6. When both Mandarin tiles are captured at least once, the game ends and the scores are finalized. Whoever has the higher score wins. Otherwise, the game is tied.
-7. Example Interaction: The game prints a MSC board with 5 stones per tile. The user enters 5 and L. The game starts distributing stones from tile 5 one-by-one to adjacent tiles to the left of it and the user's turn follows the move mechanics. Once the user's turn ends, the game prints the updated scores and board and the enemy moves next. The enemy randomly chooses a non-empty tile and a direction. Once the enemy's turn ends, the game prints the updated scores and board and asks the user for the next move...
+This project is a command-line implementation of Mandarin Square Capture (Ô ăn quan), where the user plays against an AI opponent.
+
+The user can choose to go first or second, and the game proceeds in alternating turns. The AI currently selects moves randomly.
+
+This version uses a **simplified rule set**, where all tiles are treated uniformly and the game ends when both edge tiles are empty.
+
+---
+
+## Requirements
+
+1. **Game Start**
+
+   * The user chooses whether to go first or second.
+   * The game displays:
+
+     * A board with **12 tiles**, each containing 5 stones
+     * Initial scores:
+
+       ```
+       Your score = 0, Enemy score = 0
+       ```
+     * A guide for selecting tiles and directions
+
+---
+
+2. **User Turn**
+
+   * If all tiles on the user’s side (tiles 1–5) are empty:
+
+     * The **refill rule** is applied
+   * Otherwise:
+
+     * The user selects:
+
+       * A tile (1–5)
+       * A direction (`L` or `R`)
+   * Input validation:
+
+     * Invalid tile or direction → user must retry
+     * Selecting an empty tile → user must retry
+
+---
+
+3. **Move Execution**
+
+   * If the input is valid:
+
+     * The move follows the **distribution and capture mechanics**
+     * Stones are distributed one-by-one in the chosen direction
+     * Captures occur according to the game rules
+   * After the move:
+
+     * The board and scores are updated and displayed
+
+---
+
+4. **Enemy Turn**
+
+   * After the user’s turn:
+
+     * The enemy takes a turn automatically
+   * The enemy:
+
+     * Selects a **random non-empty tile**
+     * Selects a **random direction**
+     * Applies the same move mechanics as the user
+   * If all enemy tiles are empty:
+
+     * The enemy follows the refill rule
+
+---
+
+5. **Turn Alternation**
+
+   * The user and enemy take turns alternately
+   * After each turn:
+
+     * The updated board and scores are displayed
+
+---
+
+6. **Game End Condition**
+
+   * The game ends when:
+
+     ```
+     Both edge tiles are empty
+     ```
+   * Final scores are compared:
+
+     * Higher score → winner
+     * Equal scores → draw
+
+---
+
+7. **Example Interaction**
+
+* The game prints the initial board with 5 stones per tile.
+* The user selects:
+
+  ```
+  Tile: 5
+  Direction: L
+  ```
+* The game:
+
+  * Distributes stones from tile 5 to adjacent tiles on the left
+  * Applies capture mechanics if applicable
+* After the user’s turn:
+
+  * The updated board and scores are printed
+* The enemy:
+
+  * Randomly selects a valid tile and direction
+  * Performs its move
+* The game continues until the end condition is met.
+
+---
+
+## Notes
+
+* Invalid inputs do **not** consume the user’s turn
+* The AI currently behaves randomly (no strategy)
+* The game is deterministic except for enemy move selection
+* Designed for clarity, correctness, and incremental development

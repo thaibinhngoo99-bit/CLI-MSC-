@@ -1,47 +1,64 @@
-module Board
+namespace CS220
 
-type Cell = Empty of int | O | X
+type Player =
+  | Player
+  | Computer
 
-let create () : Cell array =
-    Array.init 9 (fun i -> Empty (i + 1))
+type Board () =
+  // 12 pits:
+  // 1–5: player side
+  // 6: right quan
+  // 7–11: computer side
+  // 12: left quan
+  let pits = Array.zeroCreate 12
 
-let cellStr = function
-    | Empty n -> "0"
-    | O -> "O"
-    | X -> "X"
+  do
+    // Initialize small pits
+    for i in 1..5 do pits.[i] <- 5
+    for i in 7..11 do pits.[i] <- 5
 
-let render (board: Cell array) =
-    let s i = cellStr board.[i]
-    printfn " %s | %s | %s" (s 0) (s 1) (s 2)
-    printfn "---+---+---"
-    printfn " %s | %s | %s" (s 3) (s 4) (s 5)
-    printfn "---+---+---"
-    printfn " %s | %s | %s" (s 6) (s 7) (s 8)
+    // Initialize quan pits
+    pits.[6] <- 1
+    pits.[12] <- 1
 
-let private winLines = [|
-    [|0;1;2|]; [|3;4;5|]; [|6;7;8|]
-    [|0;3;6|]; [|1;4;7|]; [|2;5;8|]
-    [|0;4;8|]; [|2;4;6|]
-|]
+  member __.Pits = pits
 
-let winner (board: Cell array) =
-    winLines
-    |> Array.tryPick (fun line ->
-        match board.[line.[0]], board.[line.[1]], board.[line.[2]] with
-        | O, O, O -> Some O
-        | X, X, X -> Some X
-        | _ -> None)
+  // Copy board (VERY IMPORTANT for AI)
+  member __.Copy () =
+    let b = Board()
+    Array.iteri (fun i v -> b.Pits.[i] <- v) pits
+    b
 
-let isFull (board: Cell array) =
-    board |> Array.forall (function Empty _ -> false | _ -> true)
+  // Check if a pit belongs to a player
+  member __.IsOwnPit player index =
+    match player with
+    | Player -> index >= 0 && index <= 4
+    | Computer -> index >= 6 && index <= 10
 
-/// Returns Some newBoard if the square was empty, None if occupied.
-let tryPlace (board: Cell array) (sq: int) (cell: Cell) : Cell array option =
-    if sq < 1 || sq > 9 then None
-    else
-        match board.[sq - 1] with
-        | Empty _ ->
-            let b = Array.copy board
-            b.[sq - 1] <- cell
-            Some b
-        | _ -> None
+  // Check if pit is empty
+  member __.IsEmpty index =
+    pits.[index] = 0
+
+  // Take all stones from a pit
+  member __.TakeStones index =
+    let stones = pits.[index]
+    pits.[index] <- 0
+    stones
+
+  // Add one stone to a pit
+  member __.AddStone index =
+    pits.[index] <- pits.[index] + 1
+
+  // Pretty print board (important for CLI)
+  member __.Print () =
+    printfn ""
+    printfn "        [%2d] [%2d] [%2d] [%2d] [%2d]"
+      pits.[10] pits.[9] pits.[8] pits.[7] pits.[6]
+
+    printfn " [%2d]                       [%2d]"
+      pits.[11] pits.[5]
+
+    printfn "        [%2d] [%2d] [%2d] [%2d] [%2d]"
+      pits.[0] pits.[1] pits.[2] pits.[3] pits.[4]
+
+    printfn ""
