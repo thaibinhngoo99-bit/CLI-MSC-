@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="MSC/Move.fs" />
     <Compile Include="MSC/Board.fs" />
+    <Compile Include="MSC/Rules.fs" />
     <Compile Include="MSC/Game.fs" />
     <Compile Include="MSC/Program.fs" />
   </ItemGroup>

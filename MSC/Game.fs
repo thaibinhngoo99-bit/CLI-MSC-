@@ -1,78 +1,127 @@
-module Game
+namespace CS220
 
 open System
-open Board
+open CS220
 
-type GameResult = PlayerWins | EnemyWins | Draw
+type Game () =
+  let board = Board()
+  let rand = Random()
 
-let private rng = Random()
+  let mutable playerScore = 0
+  let mutable enemyScore = 0
 
-let private enemyMove (board: Cell array) : int =
-    let empties =
-        board
-        |> Array.mapi (fun i c -> i, c)
-        |> Array.choose (fun (i, c) ->
-            match c with Empty _ -> Some (i + 1) | _ -> None)
-    empties.[rng.Next(empties.Length)]
+  /// Check if all pits on a side are empty
+  let isSideEmpty player =
+    match player with
+    | Player ->
+        [0..4] |> List.forall (fun i -> board.IsEmpty i)
+    | Computer ->
+        [6..10] |> List.forall (fun i -> board.IsEmpty i)
 
-let private getUserInput (board: Cell array) : int =
-    let rec loop () =
-        printf "Your move (1-9): "
-        match Int32.TryParse(Console.ReadLine()) with
-        | true, n when n >= 1 && n <= 9 ->
-            match board.[n - 1] with
-            | Empty _ -> n
-            | _ ->
-                printfn "Square %d is already taken. Please try again." n
-                loop ()
-        | _ ->
-            printfn "Invalid input. Please enter a number from 1 to 9."
-            loop ()
-    loop ()
+  /// Refill rule (simplified)
+  let refill player =
+    match player with
+    | Player ->
+        if playerScore > 0 then
+          for i in 0..4 do
+            if board.IsEmpty i && playerScore > 0 then
+              board.AddStone i
+              playerScore <- playerScore - 1
+        else
+          printfn "You have no stones to refill. Turn skipped."
 
-let run () : GameResult =
-    let rec loop board =
-        printfn ""
-        render board
+    | Computer ->
+        if enemyScore > 0 then
+          for i in 6..10 do
+            if board.IsEmpty i && enemyScore > 0 then
+              board.AddStone i
+              enemyScore <- enemyScore - 1
 
-        // Player's turn (O)
-        let sq = getUserInput board
-        let board1 =
-            match tryPlace board sq O with
-            | Some b -> b
-            | None -> board // validated above
+  /// Get valid moves for a player
+  let validMoves player =
+    match player with
+    | Player -> [0..4] |> List.filter (fun i -> not (board.IsEmpty i))
+    | Computer -> [6..10] |> List.filter (fun i -> not (board.IsEmpty i))
 
-        match winner board1 with
-        | Some O ->
-            printfn ""
-            render board1
-            printfn "You win!"
-            PlayerWins
-        | _ when isFull board1 ->
-            printfn ""
-            render board1
-            printfn "It's a tie!"
-            Draw
-        | _ ->
-            // Enemy's turn (X)
-            let esq = enemyMove board1
-            printfn "Enemy places X on square %d." esq
-            let board2 =
-                match tryPlace board1 esq X with
-                | Some b -> b
-                | None -> board1 // shouldn't happen
+  /// Read user move
+  let rec getUserMove () =
+    printf "Select your tile (1-5): "
+    let pitInput = Console.ReadLine()
 
-            match winner board2 with
-            | Some X ->
-                printfn ""
-                render board2
-                printfn "Enemy wins!"
-                EnemyWins
-            | _ when isFull board2 ->
-                printfn ""
-                render board2
-                printfn "It's a tie!"
-                Draw
-            | _ -> loop board2
+    match Int32.TryParse pitInput with
+    | true, pit when pit >= 1 && pit <= 5 ->
+        let index = pit - 1
+        if board.IsEmpty index then
+          printfn "Tile is empty. Try again."
+          getUserMove ()
+        else
+          printf "Direction (L/R): "
+          match Console.ReadLine().ToUpper() with
+          | "L" -> (index, Left)
+          | "R" -> (index, Right)
+          | _ ->
+              printfn "Invalid direction."
+              getUserMove ()
+    | _ ->
+        printfn "Invalid input."
+        getUserMove ()
 
-    loop (create ())
+  /// Random AI move
+  let getEnemyMove () =
+    let moves = validMoves Computer
+    let index = moves.[rand.Next(moves.Length)]
+    let dir = if rand.Next(2) = 0 then Left else Right
+    printfn "Enemy chooses tile %d, direction %A" (index - 5) dir
+    (index, dir)
+
+  /// Execute move (you will implement logic in Rules)
+  let applyMove (index, dir) player =
+    let stones = board.TakeStones index
+    let mutable current = index
+
+    // simple distribution (no capture yet)
+    for _ in 1..stones do
+      current <- board.NextIndex current dir
+      board.AddStone current
+
+    // TODO: capture logic (later)
+
+  /// Check game end condition
+  let isGameOver () =
+    board.Pits.[5] = 0 && board.Pits.[11] = 0
+
+  /// Print scores
+  let printScores () =
+    printfn "Your score = %d, Enemy score = %d" playerScore enemyScore
+
+  member __.Run () =
+    printf "Do you want to go first? (Y/N): "
+    let playerFirst = Console.ReadLine().ToUpper() = "Y"
+
+    let rec loop playerTurn =
+      board.Print()
+      printScores()
+
+      if isGameOver () then
+        printfn "Game Over!"
+        if playerScore > enemyScore then printfn "You win!"
+        elif playerScore < enemyScore then printfn "Enemy wins!"
+        else printfn "Draw!"
+      else
+        match playerTurn with
+        | Player ->
+            if isSideEmpty Player then refill Player
+            else
+              let move = getUserMove ()
+              applyMove move Player
+            loop Computer
+
+        | Computer ->
+            if isSideEmpty Computer then refill Computer
+            else
+              let move = getEnemyMove ()
+              applyMove move Computer
+            loop Player
+
+    if playerFirst then loop Player
+    else loop Computer

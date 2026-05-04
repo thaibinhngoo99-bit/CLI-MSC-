@@ -5,5 +5,5 @@ type Direction =
   | Right
 
 type Move =
-  { Pit: int      // which pit (1–5 on your side)
+  { Index: int        // 0–11 (internal board index)
     Dir: Direction }
