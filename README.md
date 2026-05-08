@@ -85,7 +85,7 @@ The board consists of **12 tiles**:
 All tiles start with **5 stones**.
 
 ```
-|   | 10 | 9 | 8 | 7 | 6 |   |
+|   | 10 | 9  | 8  | 7  | 6  |   |
 | B +----+----+----+----+----+ A |
 |   | 1  | 2  | 3  | 4  | 5  |   |
 ```
