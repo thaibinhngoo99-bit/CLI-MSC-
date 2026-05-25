@@ -1,127 +1,119 @@
-namespace CS220
+namespace MSC
 
 open System
-open CS220
+open MSC
 
 type Game () =
   let board = Board()
   let rand = Random()
 
   let mutable playerScore = 0
-  let mutable enemyScore = 0
+  let mutable enemyScore  = 0
+  let mutable leftSideCaptured  = false
+  let mutable rightSideCaptured = false
 
-  /// Check if all pits on a side are empty
   let isSideEmpty player =
     match player with
-    | Player ->
-        [0..4] |> List.forall (fun i -> board.IsEmpty i)
-    | Computer ->
-        [6..10] |> List.forall (fun i -> board.IsEmpty i)
+    | Player   -> [0..4]  |> List.forall (fun i -> board.IsEmpty i)
+    | Computer -> [6..10] |> List.forall (fun i -> board.IsEmpty i)
 
-  /// Refill rule (simplified)
   let refill player =
-    match player with
-    | Player ->
-        if playerScore > 0 then
-          for i in 0..4 do
-            if board.IsEmpty i && playerScore > 0 then
-              board.AddStone i
-              playerScore <- playerScore - 1
-        else
-          printfn "You have no stones to refill. Turn skipped."
+    let pits, score =
+      match player with
+      | Player   -> [0..4],  playerScore
+      | Computer -> [6..10], enemyScore
+    if score = 0 then
+      printfn "%A has no stones to refill. Turn skipped." player
+    else
+      let mutable remaining = score
+      for i in pits do
+        if remaining > 0 then
+          board.AddStone i
+          remaining <- remaining - 1
+      match player with
+      | Player   -> playerScore <- remaining
+      | Computer -> enemyScore  <- remaining
 
-    | Computer ->
-        if enemyScore > 0 then
-          for i in 6..10 do
-            if board.IsEmpty i && enemyScore > 0 then
-              board.AddStone i
-              enemyScore <- enemyScore - 1
-
-  /// Get valid moves for a player
   let validMoves player =
     match player with
-    | Player -> [0..4] |> List.filter (fun i -> not (board.IsEmpty i))
+    | Player   -> [0..4]  |> List.filter (fun i -> not (board.IsEmpty i))
     | Computer -> [6..10] |> List.filter (fun i -> not (board.IsEmpty i))
 
-  /// Read user move
   let rec getUserMove () =
     printf "Select your tile (1-5): "
-    let pitInput = Console.ReadLine()
-
-    match Int32.TryParse pitInput with
+    let pitInput = Console.ReadLine() |> Option.ofObj |> Option.defaultValue ""
+    match Int32.TryParse(pitInput) with
     | true, pit when pit >= 1 && pit <= 5 ->
         let index = pit - 1
         if board.IsEmpty index then
           printfn "Tile is empty. Try again."
-          getUserMove ()
+          getUserMove()
         else
           printf "Direction (L/R): "
-          match Console.ReadLine().ToUpper() with
+          let dirInput = Console.ReadLine() |> Option.ofObj |> Option.defaultValue ""
+          match dirInput.ToUpper() with
           | "L" -> (index, Left)
           | "R" -> (index, Right)
-          | _ ->
-              printfn "Invalid direction."
-              getUserMove ()
+          | _   -> printfn "Invalid direction."; getUserMove()
     | _ ->
         printfn "Invalid input."
-        getUserMove ()
+        getUserMove()
 
-  /// Random AI move
   let getEnemyMove () =
     let moves = validMoves Computer
-    let index = moves.[rand.Next(moves.Length)]
-    let dir = if rand.Next(2) = 0 then Left else Right
-    printfn "Enemy chooses tile %d, direction %A" (index - 5) dir
+    let index  = moves.[rand.Next(moves.Length)]
+    let dir    = if rand.Next(2) = 0 then Left else Right
+    printfn "Enemy chooses tile %d, direction %A" (11 - index) dir
     (index, dir)
 
-  /// Execute move (you will implement logic in Rules)
   let applyMove (index, dir) player =
-    let stones = board.TakeStones index
-    let mutable current = index
+    let move   = { Index = index; Dir = dir; Player = player }
+    let gained = Rules.applyMove board move
+    if board.Pits.[5] = 0 && not rightSideCaptured then
+      rightSideCaptured <- true
+      printfn ">>> The RIGHT side tile has been captured for the first time!"
+    if board.Pits.[11] = 0 && not leftSideCaptured then
+      leftSideCaptured <- true
+      printfn ">>> The LEFT side tile has been captured for the first time!"
+    match player with
+    | Player   -> playerScore <- playerScore + gained
+    | Computer -> enemyScore  <- enemyScore  + gained
 
-    // simple distribution (no capture yet)
-    for _ in 1..stones do
-      current <- board.NextIndex current dir
-      board.AddStone current
-
-    // TODO: capture logic (later)
-
-  /// Check game end condition
   let isGameOver () =
-    board.Pits.[5] = 0 && board.Pits.[11] = 0
+    leftSideCaptured && rightSideCaptured
 
-  /// Print scores
   let printScores () =
     printfn "Your score = %d, Enemy score = %d" playerScore enemyScore
 
   member __.Run () =
     printf "Do you want to go first? (Y/N): "
-    let playerFirst = Console.ReadLine().ToUpper() = "Y"
+    let input = Console.ReadLine() |> Option.ofObj |> Option.defaultValue ""
+    let playerFirst = input.ToUpper() = "Y"
 
-    let rec loop playerTurn =
+    let rec loop currentPlayer =
       board.Print()
       printScores()
 
-      if isGameOver () then
+      if isGameOver() then
         printfn "Game Over!"
-        if playerScore > enemyScore then printfn "You win!"
+        if   playerScore > enemyScore then printfn "You win!"
         elif playerScore < enemyScore then printfn "Enemy wins!"
         else printfn "Draw!"
       else
-        match playerTurn with
+        let next =
+          match currentPlayer with
+          | Player   -> Computer
+          | Computer -> Player
+
+        match currentPlayer with
         | Player ->
             if isSideEmpty Player then refill Player
-            else
-              let move = getUserMove ()
-              applyMove move Player
-            loop Computer
+            else applyMove (getUserMove()) Player
 
         | Computer ->
             if isSideEmpty Computer then refill Computer
-            else
-              let move = getEnemyMove ()
-              applyMove move Computer
-            loop Player
+            else applyMove (getEnemyMove()) Computer
 
-    if playerFirst then loop Player
-    else loop Computer
+        loop next
+
+    if playerFirst then loop Player else loop Computer

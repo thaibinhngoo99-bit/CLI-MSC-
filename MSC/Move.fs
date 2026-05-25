@@ -1,9 +1,15 @@
-namespace CS220
+namespace MSC
 
 type Direction =
   | Left
   | Right
 
-type Move =
-  { Index: int        // 0–11 (internal board index)
-    Dir: Direction }
+type Player =
+  | Player
+  | Computer
+
+type Move = {
+  Index  : int
+  Dir    : Direction
+  Player : Player
+}

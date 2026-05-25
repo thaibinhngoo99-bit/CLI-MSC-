@@ -1,9 +1,5 @@
-namespace CS220
-open CS220
-
-type Player =
-  | Player
-  | Computer
+namespace MSC
+open MSC
 
 type Board () =
   // Index layout (0-based):
@@ -43,10 +39,39 @@ type Board () =
     pits.[index] <- pits.[index] + 1
 
   /// Move to next index (circular)
-  member __.NextIndex index direction =
+   member __.NextIndex index direction =
     match direction with
-    | Left -> (index + 11) % 12   // move left
-    | Right -> (index + 1) % 12   // move right
+    | Right ->
+        match index with
+        | 0  -> 1
+        | 1  -> 2
+        | 2  -> 3
+        | 3  -> 4
+        | 4  -> 5   // Player row → right edge
+        | 5  -> 6   // Right edge → Computer row start
+        | 6  -> 7
+        | 7  -> 8
+        | 8  -> 9
+        | 9  -> 10
+        | 10 -> 11  // Computer row end → left edge
+        | 11 -> 0   // Left edge → Player row start
+        | _  -> failwith "Invalid index"
+
+    | Left ->
+        match index with
+        | 0  -> 11  // Player row start → left edge
+        | 1  -> 0
+        | 2  -> 1
+        | 3  -> 2
+        | 4  -> 3
+        | 5  -> 4   // Right edge → Player row end
+        | 6  -> 5   // Computer row start → right edge
+        | 7  -> 6
+        | 8  -> 7
+        | 9  -> 8
+        | 10 -> 9
+        | 11 -> 10  // Left edge → Computer row end
+        | _  -> failwith "Invalid index"
 
   /// Pretty print board (matches README)
   member __.Print () =
@@ -54,7 +79,7 @@ type Board () =
     printfn "        [%2d] [%2d] [%2d] [%2d] [%2d]"
       pits.[10] pits.[9] pits.[8] pits.[7] pits.[6]
 
-    printfn " [%2d]                       [%2d]"
+    printfn " [%2d]                               [%2d]"
       pits.[11] pits.[5]
 
     printfn "        [%2d] [%2d] [%2d] [%2d] [%2d]"
