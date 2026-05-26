@@ -96,18 +96,28 @@ The board consists of **12 tiles**:
 
 * 10 regular tiles (5 per player)
 * 2 edge tiles (A and B)
+Below are the indexes for each tile:
 
 ```
-|   | 1  | 2  | 3  | 4  | 5  |   |
-| B +----+----+----+----+----+ A |
-|   | 1  | 2  | 3  | 4  | 5  |   |
+      ┌────┬────┬────┬────┬────┐
+      │  1 │  2 │  3 │  4 │  5 │
+      └────┴────┴────┴────┴────┘
+
+┌────┐                          ┌────┐
+│  A │                          │  B │
+└────┘                          └────┘
+
+      ┌────┬────┬────┬────┬────┐
+      │  1 │  2 │  3 │  4 │  5 │
+      └────┴────┴────┴────┴────┘
 ```
 
-* You only control tiles **1–5** on the bottom row
-* The enemy only controls tiles **1–5** on the top row
+* You only control tiles with index **1–5** on the bottom row
+* The enemy only controls tiles with index **1–5** on the top row
 * Both player's directions are as follows: left = clockwise, right = counterclockwise
 * All tiles start with **5 stones**.
 * Tiles A and B are special side tiles used for capture and game-ending conditions
+* These indexes won't appear during the game, meaning the player is required to memorize them
 
 ---
 
@@ -115,22 +125,37 @@ The board consists of **12 tiles**:
 
 ### Game Start
 
-1. The board is displayed 
-2. Scores are initialized:
+1. A welcome message is displayed
+2. You are prompted:
 
-   * Your score = 0
-   * Enemy score = 0
-3. You are prompted:
+   ```
+   Difficulty:
+   1. Easy (For beginners, random moves)
+   2. Hard (For strategists, uses Minimax)
+   Select difficulty (E/H):
+   ```
+3. Input:
+
+   * `E` → Easy difficulty
+   * `H` → Hard difficulty
+   * Invalid input prompts error message and default to easy difficulty
+4. You are prompted:
 
    ```
    Would you like to go first? (Y/N)
    ```
-4. Input:
+5. Input:
 
    * `Y` → you go first
    * `N` → enemy goes first
    * Invalid input prompts retry message
+6. The board is displayed 
+7. Scores are initialized:
 
+   ```
+   YOUR SCORE : 0
+   ENEMY SCORE: 0
+   ```
 ---
 
 ### Turn Flow
@@ -430,6 +455,7 @@ CLI-MSC/
 
 ## Author Notes
 
+* The number displayed on a tile of the board is the number of stones in that tile, not the tile's index
 * Invalid inputs do not consume a turn
 * Side tiles cannot be picked up during sow continuation
 * Player and AI follow identical movement rules
@@ -454,9 +480,8 @@ During development, several requirements were updated or expanded to improve gam
 
 ## Future Improvements
 
-* Deeper minimax AI
-* Alpha-beta pruning
-* Configurable rule variants
+* Deeper minimax AI (debatable given the already complex nature of the game)
+* Configurable rule variants 
 * Multiplayer mode
 * Move history / replay viewer
 * Sound effects and animations
