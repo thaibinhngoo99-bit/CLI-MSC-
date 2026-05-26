@@ -96,6 +96,7 @@ The board consists of **12 tiles**:
 
 * 10 regular tiles (5 per player)
 * 2 edge tiles (A and B)
+
 Below are the indexes for each tile:
 
 ```
