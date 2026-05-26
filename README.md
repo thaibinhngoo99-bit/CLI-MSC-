@@ -114,7 +114,7 @@ The board consists of **12 tiles**:
 
    * `Y` → you go first
    * `N` → enemy goes first
-   * Invalid input → retry
+   * Invalid input prompts retry message
 
 ---
 
@@ -167,7 +167,7 @@ After selecting a tile and direction, a move consists of 2 phases:
    * If the next tile is empty and the tile after it contains stones, then:
 
       * All stones from that tile are captured and added to the current player's score,
-      * the chain continues forward.
+      * The chain continues forward.
    
    * The capture chain ends when either one of these events occur:
 
@@ -257,9 +257,7 @@ Enemy selects tile 2, direction Right
 
 Your score = 6, enemy score = 0
 (Your turn)
-.....
-
----
+```
 
 ## Project Structure
 
