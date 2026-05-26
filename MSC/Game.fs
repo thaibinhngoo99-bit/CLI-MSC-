@@ -137,6 +137,9 @@ type Game () =
       match difficultyInput with
       | "E" -> Easy
       | "H" -> Hard
+      | _ ->
+          printfn "Invalid difficulty. Defaulting to Easy."
+          Easy
 
     printf "Do you want to go first? (Y/N): "
     let input =
