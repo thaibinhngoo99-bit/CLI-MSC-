@@ -41,16 +41,14 @@ Each turn, a player:
 
 ### Prerequisites
 
-* [.NET 10 SDK](https://dotnet.microsoft.com/download)
+[.NET 10 SDK](https://dotnet.microsoft.com/download)
 
-   Verify with:
-
-   ```bash
-   dotnet --version
-
-  (should show `10.x.x`)
-
----
+Verify with:
+ 
+```bash
+dotnet --version
+(should show `10.x.x`)
+```
 
 ### Run
 
