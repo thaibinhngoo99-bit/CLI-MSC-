@@ -232,6 +232,8 @@ If all tiles on a player's side are empty at the beginning of the turn:
 
   * Spend 1 point per tile to refill in the counter-clockwise direction
   * Stop when all tiles are filled or score reaches 0
+  * Their turn is skipped
+  
 * If their score = 0:
 
   * Their turn is skipped
@@ -251,8 +253,9 @@ The game supports multiple AI difficulty modes.
 * Uses a heuristic/minimax-style AI:
    * Evaluates all possible moves
    * Simulates captures
-   * Chooses the move that gains the highest immediate score
-(Currently depth-1 evaluation.)
+   * Chooses the move that gains the highest immediate score (Currently depth-1 evaluation.)
+
+The chosen move is displayed before execution.
 
 ---
 
@@ -290,7 +293,7 @@ These announcements are highlighted in the terminal.
 
 ---
 
-### Game End & Winning
+### Game End & Winning Conditions
 
 The game ends when:
 
@@ -472,6 +475,7 @@ During development, several requirements were updated or expanded to improve gam
 | Original Requirement | Final Status | Explanation |
 |---|---|---|
 | Enemy AI uses random move selection only | Expanded | Added multiple difficulty modes. Easy mode keeps random behavior, while Hard mode uses heuristic/minimax-style move evaluation to choose stronger moves. |
+| Player continues their turn after refill | Modified | Player loses their turn after refill. This aligns with the true rules of MSC. |
 | Game ends when both edge tiles become empty | Modified | The end condition was changed so the game ends when both side tiles have been captured at least once. This produces more consistent and shorter matches. |
 | Simplified move continuation rules | Expanded | Additional sowing and capture-chain rules were implemented to improve strategic depth and match the intended gameplay design more closely. |
 | Basic terminal board output | Expanded | Improved board visualization, highlighted announcements, scoreboards, and execution delays were added to improve readability and user experience. |
