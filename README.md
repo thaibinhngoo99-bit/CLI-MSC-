@@ -287,6 +287,7 @@ or
    >>> The LEFT side tile has been captured for the first time!
   ```
 These announcements are highlighted in the terminal.
+
 ---
 
 ### Game End & Winning
@@ -304,6 +305,7 @@ Both side tiles (A and B) have been captured at least once
 | **Draw**       | Scores are equal         |
 
 Final results are highlighted in the terminal.
+
 ---
 
 ## Replay Support
