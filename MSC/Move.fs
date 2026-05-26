@@ -13,3 +13,7 @@ type Move = {
   Dir    : Direction
   Player : Player
 }
+
+type Difficulty =
+  | Easy
+  | Hard

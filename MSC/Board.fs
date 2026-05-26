@@ -1,4 +1,5 @@
 namespace MSC
+open System
 open MSC
 
 type Board () =
@@ -72,17 +73,52 @@ type Board () =
         | 10 -> 9
         | 11 -> 10  // Left edge → Computer row end
         | _  -> failwith "Invalid index"
+  
+  member __.SetPits(values:int array) =
+    Array.iteri (fun i v -> pits.[i] <- v) values
 
+  member __.Serialize() =
+    String.concat "," (pits |> Array.map string)
   /// Pretty print board (matches README)
+  /// Cleaner board visualization
+  /// Cleaner board visualization
   member __.Print () =
+
     printfn ""
-    printfn "        [%2d] [%2d] [%2d] [%2d] [%2d]"
+
+    // Enemy side
+    Console.ForegroundColor <- ConsoleColor.Red
+
+    printfn "                ENEMY"
+    printfn ""
+
+    printfn "      ┌────┬────┬────┬────┬────┐"
+    printfn "      │ %2d │ %2d │ %2d │ %2d │ %2d │"
       pits.[10] pits.[9] pits.[8] pits.[7] pits.[6]
+    printfn "      └────┴────┴────┴────┴────┘"
 
-    printfn " [%2d]                               [%2d]"
-      pits.[11] pits.[5]
+    Console.ResetColor()
 
-    printfn "        [%2d] [%2d] [%2d] [%2d] [%2d]"
-      pits.[0] pits.[1] pits.[2] pits.[3] pits.[4]
+    // Side tiles
+    Console.ForegroundColor <- ConsoleColor.Yellow
 
     printfn ""
+    printfn "┌────┐                          ┌────┐"
+    printfn "│ %2d │                          │ %2d │"
+      pits.[11] pits.[5]
+    printfn "└────┘                          └────┘"
+
+    Console.ResetColor()
+
+    // Player side
+    Console.ForegroundColor <- ConsoleColor.Green
+
+    printfn ""
+    printfn "      ┌────┬────┬────┬────┬────┐"
+    printfn "      │ %2d │ %2d │ %2d │ %2d │ %2d │"
+      pits.[0] pits.[1] pits.[2] pits.[3] pits.[4]
+    printfn "      └────┴────┴────┴────┴────┘"
+    printfn ""
+    printfn "                YOU"
+    printfn ""
+    Console.ResetColor()

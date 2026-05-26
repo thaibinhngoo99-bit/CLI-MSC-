@@ -2,6 +2,7 @@ namespace MSC
 
 open System
 open MSC
+open System.Threading
 
 type Game () =
   let board = Board()
@@ -59,22 +60,38 @@ type Game () =
         printfn "Invalid input."
         getUserMove()
 
-  let getEnemyMove () =
-    let moves = validMoves Computer
-    let index  = moves.[rand.Next(moves.Length)]
-    let dir    = if rand.Next(2) = 0 then Left else Right
-    printfn "Enemy chooses tile %d, direction %A" (11 - index) dir
-    (index, dir)
+  let getEnemyMove difficulty =
+    let move =
+      match difficulty with
+      | Easy -> AI.randomMove board
+      | Hard -> AI.bestMove board
+    printfn "Enemy chooses tile %d, direction %A"
+      (11 - move.Index)
+      move.Dir
+    (move.Index, move.Dir)
 
   let applyMove (index, dir) player =
     let move   = { Index = index; Dir = dir; Player = player }
     let gained = Rules.applyMove board move
     if board.Pits.[5] = 0 && not rightSideCaptured then
       rightSideCaptured <- true
-      printfn ">>> The RIGHT side tile has been captured for the first time!"
+      Console.ForegroundColor <- ConsoleColor.Magenta
+      printfn ""
+      printfn "#############################################"
+      printfn " RIGHT SIDE TILE CAPTURED FOR FIRST TIME!"
+      printfn "#############################################"
+      printfn ""
+      Console.ResetColor()
     if board.Pits.[11] = 0 && not leftSideCaptured then
       leftSideCaptured <- true
-      printfn ">>> The LEFT side tile has been captured for the first time!"
+      Console.ForegroundColor <- ConsoleColor.Magenta
+      printfn ""
+      printfn "#############################################"
+      printfn " LEFT SIDE TILE CAPTURED FOR FIRST TIME!"
+      printfn "#############################################"
+      printfn ""
+      Console.ResetColor()
+
     match player with
     | Player   -> playerScore <- playerScore + gained
     | Computer -> enemyScore  <- enemyScore  + gained
@@ -83,37 +100,125 @@ type Game () =
     leftSideCaptured && rightSideCaptured
 
   let printScores () =
-    printfn "Your score = %d, Enemy score = %d" playerScore enemyScore
+    Console.ForegroundColor <- ConsoleColor.Cyan
+    printfn "================================="
+    printfn "   YOUR SCORE : %d" playerScore
+    printfn "   ENEMY SCORE: %d" enemyScore
+    printfn "================================="
+    Console.ResetColor()
+    printfn ""
 
   member __.Run () =
-    printf "Do you want to go first? (Y/N): "
-    let input = Console.ReadLine() |> Option.ofObj |> Option.defaultValue ""
-    let playerFirst = input.ToUpper() = "Y"
+    Console.ForegroundColor <- ConsoleColor.Cyan
+    printfn "============================================="
+    printfn "        CLI MANDARIN SQUARE CAPTURE"
+    printfn "============================================="
+    printfn ""
+    Console.ForegroundColor <- ConsoleColor.Yellow
+    printfn "Capture more stones than the enemy!"
+    printfn "The game ends once BOTH side tiles"
+    printfn "have been captured at least once."
+    printfn ""
+    Console.ResetColor()
 
+    printfn ""
+    printfn "Difficulty:"
+    printfn "1. Easy (For beginners, random moves)"
+    printfn "2. Hard (For strategists, uses Minimax)"
+
+    printf "Select difficulty (E/H): "
+
+    let difficultyInput =
+      Console.ReadLine()
+      |> Option.ofObj
+      |> Option.defaultValue ""
+
+    let difficulty =
+      match difficultyInput with
+      | "E" -> Easy
+      | "H" -> Hard
+
+    printf "Do you want to go first? (Y/N): "
+    let input =
+      Console.ReadLine()
+      |> Option.ofObj
+      |> Option.defaultValue ""
+    let playerFirst = input.ToUpper() = "Y"
     let rec loop currentPlayer =
       board.Print()
       printScores()
+      Thread.Sleep(1500)
 
       if isGameOver() then
-        printfn "Game Over!"
-        if   playerScore > enemyScore then printfn "You win!"
-        elif playerScore < enemyScore then printfn "Enemy wins!"
-        else printfn "Draw!"
+        Console.ForegroundColor <- ConsoleColor.Yellow
+        printfn ""
+        printfn "============================================="
+        printfn "                 GAME OVER"
+        printfn "============================================="
+        printfn ""
+        Console.ForegroundColor <- ConsoleColor.Green
+        printfn "Final Score:"
+        printfn "You   : %d" playerScore
+        printfn "Enemy : %d" enemyScore
+        printfn ""
+        if playerScore > enemyScore then
+          Console.ForegroundColor <- ConsoleColor.Cyan
+          printfn ">>> YOU WIN! <<<"
+        elif playerScore < enemyScore then
+          Console.ForegroundColor <- ConsoleColor.Red
+          printfn ">>> ENEMY WINS! <<<"
+        else
+          Console.ForegroundColor <- ConsoleColor.Magenta
+          printfn ">>> DRAW! <<<"
+        Console.ResetColor()
+        printfn ""
+
+        printf "Play again? (Y/N): "
+        let again =
+          Console.ReadLine()
+          |> Option.ofObj
+          |> Option.defaultValue ""
+        if again.ToUpper() = "Y" then
+          let newGame = Game()
+          newGame.Run()
+
       else
         let next =
           match currentPlayer with
           | Player   -> Computer
           | Computer -> Player
-
         match currentPlayer with
         | Player ->
-            if isSideEmpty Player then refill Player
-            else applyMove (getUserMove()) Player
+            Console.ForegroundColor <- ConsoleColor.Green
+            printfn ""
+            printfn "============== YOUR TURN =============="
+            Console.ResetColor()
+            Thread.Sleep(1000)
+            if isSideEmpty Player then
+              refill Player
+            else
+              let move = getUserMove()
+              Console.ForegroundColor <- ConsoleColor.Cyan
+              printfn ""
+              printfn "Executing your move..."
+              Console.ResetColor()
+              Thread.Sleep(1500)
+              applyMove move Player
 
         | Computer ->
-            if isSideEmpty Computer then refill Computer
-            else applyMove (getEnemyMove()) Computer
-
+            Console.ForegroundColor <- ConsoleColor.Red
+            printfn ""
+            printfn "============== ENEMY TURN =============="
+            printfn "Enemy is thinking..."
+            Console.ResetColor()
+            Thread.Sleep(2000)
+            if isSideEmpty Computer then
+              refill Computer
+            else
+              applyMove (getEnemyMove difficulty) Computer
         loop next
 
-    if playerFirst then loop Player else loop Computer
+    if playerFirst then
+      loop Player
+    else
+      loop Computer
