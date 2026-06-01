@@ -483,6 +483,18 @@ During development, several requirements were updated or expanded to improve gam
 
 ---
 
+## LLM Usage
+
+LLM is used during these stages:
+
+* Translating and refining the initial project proposal
+* Debugging, fixing syntax errors, and cleaning up the overall code formatting
+* Constructing UI visuals (colors, formats) after updates
+
+The rework of the game rules, move mechanics and every other central components of this game are manually crafted.
+
+---
+
 ## Future Improvements
 
 * Deeper minimax AI (debatable given the already complex nature of the game)
